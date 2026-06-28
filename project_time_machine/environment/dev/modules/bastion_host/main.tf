@@ -4,7 +4,7 @@ resource "azurerm_public_ip" "bastion" {
   location            = "centralindia"
   resource_group_name = "project_time_machine"
   allocation_method   = "Static"
-  sku                 = "StandardV2"
+  sku                 = "Standard"
 }
 # Bastion Host
 resource "azurerm_bastion_host" "bastion" {
