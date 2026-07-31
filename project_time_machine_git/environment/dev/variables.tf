@@ -1,0 +1,10 @@
+variable "time_machine_rg" {}
+variable "time_machine_virtual_networks" {}
+variable "time_machine_subnet" {}
+variable "timemachine_subnet_pip" {}
+variable "timemachine_nat_gatway" {}
+variable "nat_subnet_association" {}
+variable "nat_ip_association" {}
+variable "nic_cards" {}
+variable "os_resources" {}
+variable "nsgs" {}
