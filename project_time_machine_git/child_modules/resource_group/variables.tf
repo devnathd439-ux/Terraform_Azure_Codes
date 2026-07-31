@@ -1,5 +1,1 @@
-variable "time_machine" {
-  #   default = {
-  #     project_time_machine = "centralindia"
-  #   }
-}
+variable "time_machine_rg" {}

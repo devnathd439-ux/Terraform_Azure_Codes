@@ -1,3 +1,1 @@
-variable "time_machine_subnet" {
-
-}
+variable "time_machine_subnet" {}

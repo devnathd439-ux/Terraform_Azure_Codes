@@ -1,0 +1,1 @@
+variable "timemachine_nat_gatway" {}

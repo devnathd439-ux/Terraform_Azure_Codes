@@ -1,33 +1,13 @@
-resource "azurerm_network_interface" "nic_cards" {
-  for_each = {
-    # nic_1 = var.nic_cards.nic_1
-    # nic_2 = var.nic_cards.nic_2
-    # nic_3 = var.nic_cards.nic_3
-    nic_4 = var.nic_cards.nic_4
-    nic_5 = var.nic_cards.nic_5
-  }
-  name                = each.value.nic_card_name
-  location            = each.value.location
-  resource_group_name = each.value.resource_group_name
-
-  ip_configuration {
-    name                          = each.value.config_name
-    subnet_id                     = each.value.subnet_id
-    private_ip_address_allocation = "Dynamic"
-  }
-}
 # Create a virtual machines with the above network interface
 resource "azurerm_virtual_machine" "os_resources" {
   for_each = {
-    # main_switch_vm          = var.os_resources.main_switch_vm
-    # flux_capacitor_linux_vm = var.os_resources.flux_capacitor_linux_vm
-    # time_circuit_linux_vm   = var.os_resources.time_circuit_linux_vm
-    main_switch-1_linux_vm = var.os_resources.main_switch-1_linux_vm
-    main_switch-2_linux_vm = var.os_resources.main_switch-2_linux_vm
+    # main_switch_windows-vm   = var.os_resources.main_switch_windows-vm
+    main_switch_linux-vm     = var.os_resources.main_switch_linux-vm
+    # flux_capacitor_linux-vm1 = var.os_resources.flux_capacitor_linux-vm1
+    # flux_capacitor_linux-vm2 = var.os_resources.flux_capacitor_linux-vm2
+    time_circuit_linux-vm1   = var.os_resources.time_circuit_linux-vm1
+    # time_circuit_linux-vm2   = var.os_resources.time_circuit_linux-vm2
   }
-  depends_on = [
-    azurerm_network_interface.nic_cards
-  ]
   name                  = each.value.vm_name
   location              = each.value.location
   resource_group_name   = each.value.resource_group_name

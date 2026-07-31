@@ -2,7 +2,7 @@ resource "azurerm_subnet" "time_machine_subnet" {
   for_each = {
     bastionhost_subnet    = var.time_machine_subnet.bastionhost_subnet
     main_switch_subnet    = var.time_machine_subnet.main_switch_subnet
-    flux_capacitor_subnet = var.time_machine_subnet.flux_capacitor_subnet
+    # flux_capacitor_subnet = var.time_machine_subnet.flux_capacitor_subnet
     time_circuit_subnet   = var.time_machine_subnet.time_circuit_subnet
   }
   name                 = each.value.name

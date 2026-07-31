@@ -1,6 +1,6 @@
 resource "azurerm_virtual_network" "time_machine_virtual_networks" {
   for_each = {
-    vnet_1 = var.time_machine_virtual_networks.vnet_1,
+    vnet_1 = var.time_machine_virtual_networks.vnet_1
     vnet_2 = var.time_machine_virtual_networks.vnet_2
   }
   name                = each.value.name

@@ -1,3 +1,1 @@
-variable "time_machine_virtual_networks" {
-
-}
+variable "time_machine_virtual_networks" {}

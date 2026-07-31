@@ -1,0 +1,1 @@
+variable "nat_ip_association" {}
