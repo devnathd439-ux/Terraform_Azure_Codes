@@ -13,6 +13,11 @@ jobs:
     name: "Terraform"
     runs-on: ubuntu-latest
     
+    # Points to the exact directory where main.tf, provider.tf, etc. live
+    defaults:
+      run:
+        working-directory: project_time_machine_git/environment/dev
+
     # Define environment variables for your cloud provider here
     # env:
     #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
