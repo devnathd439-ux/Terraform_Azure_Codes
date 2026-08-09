@@ -1,377 +1,516 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 12.0px 'Zapf Dingbats'; font-kerning: none}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChronoX Time Machine Interface</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron', sans-serif;
+}
+
+body{
+    background:#030712;
+    overflow:hidden;
+    color:#00ffff;
+}
+
+body::before{
+    content:'';
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+        linear-gradient(rgba(0,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,.05) 1px, transparent 1px);
+    background-size:50px 50px;
+    animation:gridMove 20s linear infinite;
+}
+
+@keyframes gridMove{
+    from{transform:translateY(0);}
+    to{transform:translateY(-50px);}
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+.is-traveling {
+    animation: shake 0.3s infinite;
+}
+
+.warp-flash {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: #ffffff;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+}
+
+@keyframes flashBang {
+    0% { opacity: 0; }
+    10% { opacity: 1; background: #ffffff; }
+    30% { background: #00ffff; }
+    100% { opacity: 0; }
+}
+
+.do-flash {
+    animation: flashBang 1.5s ease-out forwards;
+}
+
+.container{
+    position:relative;
+    z-index:2;
+    height:100vh;
+    display:flex;
+    padding:20px;
+    gap:20px;
+}
+
+.panel{
+    background:rgba(0,20,40,.5);
+    border:1px solid rgba(0,255,255,.4);
+    box-shadow:
+        0 0 20px rgba(0,255,255,.2),
+        inset 0 0 20px rgba(0,255,255,.1);
+    backdrop-filter:blur(15px);
+    border-radius:18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.left{
+    width:30%;
+    padding:20px;
+}
+
+.center{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.right{
+    width:25%;
+    padding:20px;
+}
+
+.title{
+    font-size:24px;
+    text-align:center;
+    margin-bottom:20px;
+    text-shadow:0 0 20px cyan;
+}
+
+.input-group {
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 15px;
+}
+
+/* Custom Scrollbar for input area */
+.input-group::-webkit-scrollbar { width: 5px; }
+.input-group::-webkit-scrollbar-thumb { background: cyan; border-radius: 5px; }
+
+label{
+    display:block;
+    margin-top:12px;
+    margin-bottom:5px;
+    font-size: 14px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    background:#04111f;
+    border:1px solid cyan;
+    color:white;
+    border-radius:8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+@keyframes flashInput {
+    0% { box-shadow: none; border-color: cyan; }
+    50% { box-shadow: 0 0 20px #00ff88, inset 0 0 10px #00ff88; border-color: #00ff88; }
+    100% { box-shadow: none; border-color: cyan; }
+}
+
+.input-flash {
+    animation: flashInput 0.6s ease-out;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    background:cyan;
+    color:black;
+    font-weight:bold;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.3s;
+    flex-shrink: 0;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 25px cyan;
+}
+
+.time-core{
+    width:320px;
+    height:320px;
+    border-radius:50%;
+    border:3px solid cyan;
+    position:relative;
+    animation:spin 8s linear infinite;
+    box-shadow:
+        0 0 40px cyan,
+        inset 0 0 40px cyan;
+    transition: all 0.5s;
+}
+
+.time-core::before{
+    content:'';
+    position:absolute;
+    inset:25px;
+    border-radius:50%;
+    border:2px dashed inherit; 
+}
+
+.time-core::after{
+    content:'';
+    position:absolute;
+    inset:80px;
+    border-radius:50%;
+    background:radial-gradient(circle, currentColor, transparent);
+    color: cyan; 
+    transition: all 0.5s;
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+.status-box{
+    margin-bottom:25px;
+}
+
+.status-title{
+    margin-bottom:8px;
+    font-size: 14px;
+}
+
+.anchor-text {
+    font-size: 15px;
+    color: #00ff88;
+    text-shadow: 0 0 10px #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #00ff88;
+}
+
+.bar{
+    width:100%;
+    height:15px;
+    background:#111;
+    border-radius:15px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    width:80%;
+    background:linear-gradient(90deg,cyan,#00ff88);
+    box-shadow:0 0 20px cyan;
+    transition:1s;
+}
+
+.log{
+    margin-top:15px;
+    background:#020b14;
+    height:180px;
+    overflow:auto;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid cyan;
+    font-size:12px;
+    flex-shrink: 0;
+}
+
+.log p{
+    margin-bottom:8px;
+    color:#8ff;
+}
+
+.warning{
+    color:#00ff88;
+    text-shadow:0 0 10px #00ff88;
+}
+
+.execution{
+    font-size:26px;
+    margin-top:30px;
+    letter-spacing:2px;
+    text-shadow:0 0 20px cyan;
+    transition: 0.5s all;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.pulse{
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{opacity:.5;}
+    50%{opacity:1;}
+    100%{opacity:.5;}
+}
+
+.corner{
+    position:absolute;
+    width:40px;
+    height:40px;
+    border:2px solid cyan;
+}
+
+.tl{top:15px;left:15px;border-right:none;border-bottom:none;}
+.tr{top:15px;right:15px;border-left:none;border-bottom:none;}
+.bl{bottom:15px;left:15px;border-right:none;border-top:none;}
+.br{bottom:15px;right:15px;border-left:none;border-top:none;}
+</style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;title&gt;ChronoX Time Machine Interface&lt;/title&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;style&gt;</span></p>
-<p class="p1"><span class="s1">@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;display=swap');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">*{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin:0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box-sizing:border-box;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-family:'Orbitron', sans-serif;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">body{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:#030712;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>overflow:hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:#00ffff;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">body::before{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>content:'';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:200%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:200%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>linear-gradient(rgba(0,255,255,.05) 1px, transparent 1px),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>linear-gradient(90deg, rgba(0,255,255,.05) 1px, transparent 1px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background-size:50px 50px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>animation:gridMove 20s linear infinite;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">@keyframes gridMove{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>from{transform:translateY(0);}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>to{transform:translateY(-50px);}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.container{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>z-index:2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:100vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>display:flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:25px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>gap:20px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.panel{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:rgba(0,20,40,.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:1px solid rgba(0,255,255,.4);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box-shadow:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>0 0 20px rgba(0,255,255,.2),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>inset 0 0 20px rgba(0,255,255,.1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>backdrop-filter:blur(15px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:18px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.left{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:30%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:25px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.center{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>flex:1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>display:flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>flex-direction:column;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>justify-content:center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>align-items:center;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.right{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:25%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:25px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.title{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-size:28px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>text-align:center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-bottom:25px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>text-shadow:0 0 20px cyan;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">label{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>display:block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-top:15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-bottom:8px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">input{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:#04111f;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:1px solid cyan;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:10px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">button{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-top:25px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:cyan;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:black;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-weight:bold;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cursor:pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>transition:.3s;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">button:hover{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>transform:scale(1.05);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box-shadow:0 0 25px cyan;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.time-core{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:320px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:320px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:3px solid cyan;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>animation:spin 8s linear infinite;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box-shadow:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>0 0 40px cyan,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>inset 0 0 40px cyan;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.time-core::before{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>content:'';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>inset:25px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:2px dashed #00ffff;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.time-core::after{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>content:'';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>inset:80px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:radial-gradient(circle, cyan, transparent);</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">@keyframes spin{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>from{transform:rotate(0deg);}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>to{transform:rotate(360deg);}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.core-text{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>text-align:center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-size:18px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:white;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.status-box{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-bottom:25px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.status-title{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-bottom:8px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.bar{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:#111;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>overflow:hidden;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.fill{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:80%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:linear-gradient(90deg,cyan,#00ff88);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box-shadow:0 0 20px cyan;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>transition:1s;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.log{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-top:25px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background:#020b14;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:220px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>overflow:auto;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding:15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border-radius:10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:1px solid cyan;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-size:12px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.log p{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-bottom:10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:#8ff;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.warning{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:#00ff88;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>text-shadow:0 0 10px #00ff88;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.execution{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-size:26px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin-top:30px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>letter-spacing:3px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>text-shadow:0 0 20px cyan;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.pulse{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>animation:pulse 2s infinite;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">@keyframes pulse{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>0%{opacity:.5;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>50%{opacity:1;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>100%{opacity:.5;}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.corner{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>position:absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>width:40px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>height:40px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>border:2px solid cyan;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.tl{top:15px;left:15px;border-right:none;border-bottom:none;}</span></p>
-<p class="p1"><span class="s1">.tr{top:15px;right:15px;border-left:none;border-bottom:none;}</span></p>
-<p class="p1"><span class="s1">.bl{bottom:15px;left:15px;border-right:none;border-top:none;}</span></p>
-<p class="p1"><span class="s1">.br{bottom:15px;right:15px;border-left:none;border-top:none;}</span></p>
-<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div class="corner tl"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;div class="corner tr"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;div class="corner bl"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;div class="corner br"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div class="container"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="panel left"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2 class="title"&gt;TEMPORAL INPUT&lt;/h2&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Destination Year&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="number" id="year" value="3025"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Destination Date&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="date"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Timeline Branch&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" value="Alpha-7"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button onclick="executeTravel()"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>INITIATE TIME JUMP</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="log" id="log"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p&gt;System Ready...&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p&gt;Quantum Core Stable...&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="time-core"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="execution pulse" id="status"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>CHRONO CORE ONLINE</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="panel right"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2 class="title"&gt;SYSTEM STATUS&lt;/h2&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="status-box"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="status-title"&gt;Temporal Energy&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="bar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="fill" id="energy"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="status-box"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="status-title"&gt;Timeline Stability&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="bar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="fill" id="stability"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="status-box"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="status-title"&gt;Quantum Synchronization&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="bar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="fill" id="sync"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div style="margin-top:25px"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h3 class="warning"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>PARADOX RISK: LOW</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">const log = document.getElementById('log');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function addLog(text){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const p = document.createElement('p');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>p.innerText = "</span><span class="s2">➜</span><span class="s1"> " + text;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>log.appendChild(p);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>log.scrollTop = log.scrollHeight;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function executeTravel(){</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const year = document.getElementById('year').value;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('status').innerText =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"TIME JUMP INITIALIZING";</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>addLog("Temporal Coordinates Locked");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>addLog("Target Year: " + year);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setTimeout(()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Quantum Reactor Charging...");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('energy').style.width="100%";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>},1000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setTimeout(()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Timeline Stability Confirmed");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('stability').style.width="95%";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>},2000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setTimeout(()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Wormhole Formation Detected");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('sync').style.width="100%";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>},3000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setTimeout(()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Chrono Tunnel Open");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Temporal Transition Started");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('status').innerText =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"TRAVELING THROUGH TIME...";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>},4000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setTimeout(()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addLog("Arrival Successful");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('status').innerText =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"DESTINATION REACHED";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>},6500);</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+<div id="flashOverlay" class="warp-flash"></div>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="container">
+
+    <div class="panel left">
+        <h2 class="title">TEMPORAL INPUT</h2>
+
+        <div class="input-group">
+            <label for="year">Destination Year</label>
+            <input type="number" id="year" value="3025" class="trigger-anim">
+
+            <label for="date">Destination Date</label>
+            <input type="date" id="date" class="trigger-anim">
+
+            <!-- NEW: Destination Location Inputs -->
+            <label for="dest-loc">Destination Location</label>
+            <input type="text" id="dest-loc" value="Neo-Kolkata Metroplex" class="trigger-anim">
+
+            <label for="dest-coords">Spatial Coordinates</label>
+            <input type="text" id="dest-coords" value="LAT: 23.9554, LNG: 88.0336" class="trigger-anim">
+
+            <label for="branch">Timeline Branch</label>
+            <input type="text" id="branch" value="Alpha-7" class="trigger-anim">
+        </div>
+
+        <button onclick="executeTravel()" id="jumpBtn">
+            INITIATE TIME JUMP
+        </button>
+
+        <div class="log" id="log">
+            <p>➜ System Ready...</p>
+            <p>➜ Quantum Core Stable...</p>
+        </div>
+    </div>
+
+    <div class="center">
+        <div class="time-core" id="core"></div>
+
+        <div class="execution pulse" id="status">
+            CHRONO CORE ONLINE
+        </div>
+    </div>
+
+    <div class="panel right">
+        <h2 class="title">SYSTEM STATUS</h2>
+
+        <!-- NEW: Current Real-World Location Anchor -->
+        <div class="status-box">
+            <div class="status-title">Current Spatial Anchor</div>
+            <div class="anchor-text">Kandi, West Bengal, India</div>
+        </div>
+
+        <div class="status-box">
+            <div class="status-title">Temporal Energy</div>
+            <div class="bar">
+                <div class="fill" id="energy"></div>
+            </div>
+        </div>
+
+        <div class="status-box">
+            <div class="status-title">Timeline Stability</div>
+            <div class="bar">
+                <div class="fill" id="stability"></div>
+            </div>
+        </div>
+
+        <div class="status-box">
+            <div class="status-title">Quantum Synchronization</div>
+            <div class="bar">
+                <div class="fill" id="sync"></div>
+            </div>
+        </div>
+
+        <div style="margin-top:25px">
+            <h3 class="warning">
+                PARADOX RISK: LOW
+            </h3>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const log = document.getElementById('log');
+
+function addLog(text){
+    const p = document.createElement('p');
+    p.innerText = "➜ " + text;
+    log.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+}
+
+// Add animation to all input fields when changed
+document.querySelectorAll('.trigger-anim').forEach(input => {
+    input.addEventListener('change', function(e) {
+        if (this.value) {
+            this.classList.remove('input-flash');
+            void this.offsetWidth; 
+            this.classList.add('input-flash');
+
+            addLog("Target Variable Updated: " + this.id.toUpperCase());
+
+            const core = document.getElementById('core');
+            core.style.animationDuration = '1s';
+            core.style.borderColor = '#00ff88';
+            core.style.color = '#00ff88';
+            core.style.boxShadow = '0 0 60px #00ff88, inset 0 0 60px #00ff88';
+
+            setTimeout(() => {
+                core.style.animationDuration = '8s';
+                core.style.borderColor = 'cyan';
+                core.style.color = 'cyan';
+                core.style.boxShadow = '0 0 40px cyan, inset 0 0 40px cyan';
+            }, 1500);
+        }
+    });
+});
+
+function executeTravel(){
+    const year = document.getElementById('year').value;
+    const destLoc = document.getElementById('dest-loc').value;
+    const destCoords = document.getElementById('dest-coords').value;
+    const status = document.getElementById('status');
+    const core = document.getElementById('core');
+    const btn = document.getElementById('jumpBtn');
+    
+    btn.disabled = true;
+
+    // Reset UI
+    core.style.borderColor = 'cyan';
+    core.style.color = 'cyan';
+    core.style.boxShadow = '0 0 40px cyan, inset 0 0 40px cyan';
+    status.style.color = 'cyan';
+    status.style.textShadow = '0 0 20px cyan';
+    document.getElementById('energy').style.width = "10%";
+    document.getElementById('stability').style.width = "10%";
+    document.getElementById('sync').style.width = "10%";
+
+    status.innerHTML = "JUMP INITIALIZING";
+
+    addLog("Uncoupling from Origin: Kandi, West Bengal");
+    addLog("Locking Spatial Target: " + destLoc);
+    addLog("Mapping Coords: " + destCoords);
+    addLog("Target Year: " + year);
+
+    setTimeout(()=>{
+        addLog("Quantum Reactor Charging...");
+        document.getElementById('energy').style.width = "100%";
+    }, 1000);
+
+    setTimeout(()=>{
+        addLog("Timeline Stability Confirmed");
+        document.getElementById('stability').style.width = "95%";
+    }, 2000);
+
+    setTimeout(()=>{
+        addLog("Wormhole Formation Detected");
+        document.getElementById('sync').style.width = "100%";
+    }, 3000);
+
+    setTimeout(()=>{
+        addLog("Chrono Tunnel Open");
+        addLog("Space-Time Fold Initiated");
+        status.innerHTML = "TRAVELING THROUGH<br>SPACE-TIME...";
+        
+        document.body.classList.add('is-traveling');
+        core.style.animationDuration = '0.2s';
+        core.style.borderColor = 'white';
+        core.style.color = 'white';
+        core.style.boxShadow = '0 0 60px white, inset 0 0 60px white';
+    }, 4000);
+
+    setTimeout(()=>{
+        addLog("Arrival Successful");
+        
+        // Show multi-line arrival text
+        status.innerHTML = `ARRIVED IN ${year}<br><span style="font-size:18px; color:white;">${destLoc.toUpperCase()}</span>`;
+        
+        document.body.classList.remove('is-traveling');
+        
+        const flashOverlay = document.getElementById('flashOverlay');
+        flashOverlay.classList.remove('do-flash');
+        void flashOverlay.offsetWidth; 
+        flashOverlay.classList.add('do-flash');
+
+        core.style.animationDuration = '8s';
+        core.style.borderColor = '#ff00ff';
+        core.style.color = '#ff00ff';
+        core.style.boxShadow = '0 0 50px #ff00ff, inset 0 0 50px #ff00ff';
+        
+        status.style.color = '#ff00ff';
+        status.style.textShadow = '0 0 20px #ff00ff';
+
+        btn.disabled = false;
+    }, 6000);
+}
+</script>
 </body>
 </html>
