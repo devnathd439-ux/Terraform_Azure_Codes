@@ -1,0 +1,58 @@
+name: "Terraform Pipeline"
+
+on:
+  push:
+    branches:
+      - test    
+  pull_request:
+    branches:
+      - test
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    
+    # Points to the exact directory where main.tf, provider.tf, etc. live
+    defaults:
+      run:
+        working-directory: project_time_machine_git/environment/dev
+
+    # Define Azure-specific environment variables
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          auth-type: serviceprincipals
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        # with:
+        #   # You can specify a specific version of Terraform here
+        #   terraform_version: "1.5.0" 
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # Only run apply if the event is a push to the main branch
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/test' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
