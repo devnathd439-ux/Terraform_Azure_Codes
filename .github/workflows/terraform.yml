@@ -17,6 +17,13 @@ jobs:
       run:
         working-directory: project_time_machine_git/environment/dev
 
+    # Required Azure Service Principal credentials for the azurerm provider
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
