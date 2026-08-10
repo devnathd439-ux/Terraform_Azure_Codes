@@ -3,513 +3,994 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChronoX Time Machine Interface</title>
+<title>ChronoX Quantum Time Machine Console</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap');
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Orbitron', sans-serif;
+:root {
+    --cyan: #00f3ff;
+    --magenta: #ff0055;
+    --green: #00ff88;
+    --amber: #ffb700;
+    --red-led: #ff2a6d;
+    --panel-bg: rgba(10, 16, 28, 0.75);
+    --border-glow: rgba(0, 243, 255, 0.3);
 }
 
-body{
-    background:#030712;
-    overflow:hidden;
-    color:#00ffff;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Orbitron', sans-serif;
+    user-select: none;
 }
 
-body::before{
-    content:'';
-    position:absolute;
-    width:200%;
-    height:200%;
-    background:
-        linear-gradient(rgba(0,255,255,.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,255,.05) 1px, transparent 1px);
-    background-size:50px 50px;
-    animation:gridMove 20s linear infinite;
+body {
+    background: #02040a;
+    overflow: hidden;
+    color: var(--cyan);
+    height: 100vh;
+    width: 100vw;
 }
 
-@keyframes gridMove{
-    from{transform:translateY(0);}
-    to{transform:translateY(-50px);}
+/* Background animated quantum grid */
+body::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: 
+        radial-gradient(circle at center, transparent 20%, #02040a 80%),
+        linear-gradient(rgba(0, 243, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    animation: gridPerspective 25s linear infinite;
+    transform: perspective(500px) rotateX(60deg);
 }
 
-@keyframes shake {
-    0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-    20% { transform: translate(-3px, 0px) rotate(1deg); }
-    30% { transform: translate(3px, 2px) rotate(0deg); }
-    40% { transform: translate(1px, -1px) rotate(1deg); }
-    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-    60% { transform: translate(-3px, 1px) rotate(0deg); }
-    70% { transform: translate(3px, 1px) rotate(-1deg); }
-    80% { transform: translate(-1px, -1px) rotate(1deg); }
-    90% { transform: translate(1px, 2px) rotate(0deg); }
-    100% { transform: translate(0px, 0px) rotate(0deg); }
+@keyframes gridPerspective {
+    from { transform: perspective(500px) rotateX(45deg) translateY(0); }
+    to { transform: perspective(500px) rotateX(45deg) translateY(40px); }
 }
 
-.is-traveling {
-    animation: shake 0.3s infinite;
-}
-
+/* Fullscreen FX */
 .warp-flash {
     position: fixed;
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
+    inset: 0;
     background: #ffffff;
     z-index: 9999;
     pointer-events: none;
     opacity: 0;
 }
 
-@keyframes flashBang {
-    0% { opacity: 0; }
-    10% { opacity: 1; background: #ffffff; }
-    30% { background: #00ffff; }
+.do-flash {
+    animation: hyperFlash 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes hyperFlash {
+    0% { opacity: 0; background: #fff; }
+    15% { opacity: 1; background: #00f3ff; filter: blur(10px); }
+    40% { background: #ff0055; }
     100% { opacity: 0; }
 }
 
-.do-flash {
-    animation: flashBang 1.5s ease-out forwards;
+.is-traveling {
+    animation: cockpitShake 0.12s infinite alternate ease-in-out;
 }
 
-.container{
-    position:relative;
-    z-index:2;
-    height:100vh;
-    display:flex;
-    padding:20px;
-    gap:20px;
+@keyframes cockpitShake {
+    0% { transform: translate(2px, 1px) rotate(0.2deg); }
+    50% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+    100% { transform: translate(1px, 3px) rotate(0.1deg); }
 }
 
-.panel{
-    background:rgba(0,20,40,.5);
-    border:1px solid rgba(0,255,255,.4);
-    box-shadow:
-        0 0 20px rgba(0,255,255,.2),
-        inset 0 0 20px rgba(0,255,255,.1);
-    backdrop-filter:blur(15px);
-    border-radius:18px;
+/* Header Dashboard Bar */
+.top-hud {
+    position: relative;
+    z-index: 10;
+    height: 50px;
+    background: rgba(5, 10, 20, 0.85);
+    border-bottom: 1px solid var(--border-glow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+}
+
+.brand {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-shadow: 0 0 12px var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand span {
+    color: var(--magenta);
+}
+
+.hud-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(0, 243, 255, 0.08);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+}
+
+/* Main Cockpit Layout */
+.container {
+    position: relative;
+    z-index: 2;
+    height: calc(100vh - 50px);
+    display: grid;
+    grid-template-columns: 340px 1fr 340px;
+    gap: 18px;
+    padding: 18px;
+}
+
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 243, 255, 0.05);
+    backdrop-filter: blur(16px);
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
 }
 
-.left{
-    width:30%;
-    padding:20px;
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
 }
 
-.center{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+.panel-title {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 8px;
 }
 
-.right{
-    width:25%;
-    padding:20px;
+/* LED Temporal Clock Display Section (Delorean Style) */
+.led-clock-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
-.title{
-    font-size:24px;
-    text-align:center;
-    margin-bottom:20px;
-    text-shadow:0 0 20px cyan;
+.led-card {
+    background: #030810;
+    border: 1px solid #1a293d;
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
 }
 
+.led-card.destination { border-color: rgba(255, 42, 109, 0.4); }
+.led-card.present { border-color: rgba(0, 255, 136, 0.4); }
+.led-card.departed { border-color: rgba(255, 183, 0, 0.4); }
+
+.led-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.destination .led-label { color: var(--red-led); }
+.present .led-label { color: var(--green); }
+.departed .led-label { color: var(--amber); }
+
+.led-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.destination .led-display { color: var(--red-led); }
+.present .led-display { color: var(--green); }
+.departed .led-display { color: var(--amber); }
+
+/* Form Inputs & Controls */
 .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     overflow-y: auto;
-    padding-right: 5px;
+    padding-right: 4px;
+}
+
+.input-group::-webkit-scrollbar { width: 4px; }
+.input-group::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 4px; }
+
+.field-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(0, 243, 255, 0.7);
+}
+
+input, select {
+    width: 100%;
+    padding: 9px 12px;
+    background: rgba(3, 10, 20, 0.9);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    color: #fff;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.25s;
+}
+
+input:focus, select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+}
+
+/* Preset Buttons */
+.presets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.btn-preset {
+    padding: 6px;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    color: #a0f0ff;
+    font-size: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+}
+
+.btn-preset:hover {
+    background: rgba(0, 243, 255, 0.2);
+    border-color: var(--cyan);
+    color: #fff;
+}
+
+/* Main Jump Button & Interlock */
+.jump-control-wrapper {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.interlock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,0,85,0.08);
+    border: 1px solid rgba(ff,0,85,0.3);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    color: var(--magenta);
+}
+
+.toggle-switch {
+    width: 36px;
+    height: 18px;
+    background: #111;
+    border-radius: 10px;
+    border: 1px solid var(--magenta);
+    position: relative;
+    cursor: pointer;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: 2px; left: 2px;
+    background: var(--magenta);
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.toggle-switch.active::after {
+    left: 20px;
+    background: var(--green);
+}
+
+.toggle-switch.active {
+    border-color: var(--green);
+}
+
+.btn-jump {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(0, 243, 255, 0.8));
+    color: #000;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-jump:disabled {
+    background: #1a2636;
+    color: #4a607a;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-jump:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 35px var(--cyan);
+    background: var(--cyan);
+}
+
+/* Center Section: Core Visualizer */
+.center-display {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.core-container {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#warpCanvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.core-ring-overlay {
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    border: 2px dashed rgba(0, 243, 255, 0.3);
+    animation: rotateCW 30s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.core-ring-overlay-2 {
+    position: absolute;
+    inset: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 0, 85, 0.3);
+    border-left-color: transparent;
+    animation: rotateCCW 15s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes rotateCW { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes rotateCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+.center-hud-text {
+    margin-top: 20px;
+    text-align: center;
+    z-index: 5;
+}
+
+.status-headline {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px var(--cyan);
+    margin-bottom: 5px;
+}
+
+.status-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: rgba(0, 243, 255, 0.7);
+}
+
+/* Diagnostic Bars & Logs */
+.telemetry-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: 15px;
 }
 
-/* Custom Scrollbar for input area */
-.input-group::-webkit-scrollbar { width: 5px; }
-.input-group::-webkit-scrollbar-thumb { background: cyan; border-radius: 5px; }
-
-label{
-    display:block;
-    margin-top:12px;
-    margin-bottom:5px;
-    font-size: 14px;
+.telemetry-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-input{
-    width:100%;
-    padding:10px;
-    background:#04111f;
-    border:1px solid cyan;
-    color:white;
-    border-radius:8px;
-    transition: all 0.3s;
-    font-size: 14px;
+.telemetry-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
 }
 
-@keyframes flashInput {
-    0% { box-shadow: none; border-color: cyan; }
-    50% { box-shadow: 0 0 20px #00ff88, inset 0 0 10px #00ff88; border-color: #00ff88; }
-    100% { box-shadow: none; border-color: cyan; }
+.bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.input-flash {
-    animation: flashInput 0.6s ease-out;
+.bar-fill {
+    height: 100%;
+    width: 75%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    box-shadow: 0 0 10px var(--cyan);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button{
-    width:100%;
-    padding:15px;
-    background:cyan;
-    color:black;
-    font-weight:bold;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    transition:.3s;
-    flex-shrink: 0;
+.bar-fill.warning {
+    background: linear-gradient(90deg, var(--amber), var(--magenta));
+    box-shadow: 0 0 10px var(--magenta);
 }
 
-button:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 25px cyan;
-}
-
-.time-core{
-    width:320px;
-    height:320px;
-    border-radius:50%;
-    border:3px solid cyan;
-    position:relative;
-    animation:spin 8s linear infinite;
-    box-shadow:
-        0 0 40px cyan,
-        inset 0 0 40px cyan;
-    transition: all 0.5s;
-}
-
-.time-core::before{
-    content:'';
-    position:absolute;
-    inset:25px;
-    border-radius:50%;
-    border:2px dashed inherit; 
-}
-
-.time-core::after{
-    content:'';
-    position:absolute;
-    inset:80px;
-    border-radius:50%;
-    background:radial-gradient(circle, currentColor, transparent);
-    color: cyan; 
-    transition: all 0.5s;
-}
-
-@keyframes spin{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
-}
-
-.status-box{
-    margin-bottom:25px;
-}
-
-.status-title{
-    margin-bottom:8px;
-    font-size: 14px;
-}
-
-.anchor-text {
-    font-size: 15px;
-    color: #00ff88;
-    text-shadow: 0 0 10px #00ff88;
-    background: rgba(0, 255, 136, 0.1);
-    padding: 10px;
+/* Console Log Box */
+.terminal-log {
+    flex: 1;
+    background: #020710;
+    border: 1px solid rgba(0, 243, 255, 0.2);
     border-radius: 8px;
-    border-left: 3px solid #00ff88;
+    padding: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.bar{
-    width:100%;
-    height:15px;
-    background:#111;
-    border-radius:15px;
-    overflow:hidden;
+.terminal-log::-webkit-scrollbar { width: 3px; }
+.terminal-log::-webkit-scrollbar-thumb { background: var(--cyan); }
+
+.log-entry {
+    color: #7dd3fc;
+    line-height: 1.3;
 }
 
-.fill{
-    height:100%;
-    width:80%;
-    background:linear-gradient(90deg,cyan,#00ff88);
-    box-shadow:0 0 20px cyan;
-    transition:1s;
+.log-entry.alert {
+    color: var(--magenta);
+    font-weight: bold;
 }
 
-.log{
-    margin-top:15px;
-    background:#020b14;
-    height:180px;
-    overflow:auto;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid cyan;
-    font-size:12px;
-    flex-shrink: 0;
+.log-entry.success {
+    color: var(--green);
 }
 
-.log p{
-    margin-bottom:8px;
-    color:#8ff;
+/* Sci Fi Corner Accents */
+.corner-bracket {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--cyan);
+    pointer-events: none;
 }
-
-.warning{
-    color:#00ff88;
-    text-shadow:0 0 10px #00ff88;
-}
-
-.execution{
-    font-size:26px;
-    margin-top:30px;
-    letter-spacing:2px;
-    text-shadow:0 0 20px cyan;
-    transition: 0.5s all;
-    text-align: center;
-    line-height: 1.4;
-}
-
-.pulse{
-    animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-    0%{opacity:.5;}
-    50%{opacity:1;}
-    100%{opacity:.5;}
-}
-
-.corner{
-    position:absolute;
-    width:40px;
-    height:40px;
-    border:2px solid cyan;
-}
-
-.tl{top:15px;left:15px;border-right:none;border-bottom:none;}
-.tr{top:15px;right:15px;border-left:none;border-bottom:none;}
-.bl{bottom:15px;left:15px;border-right:none;border-top:none;}
-.br{bottom:15px;right:15px;border-left:none;border-top:none;}
+.cb-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+.cb-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+.cb-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+.cb-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 </style>
 </head>
 <body>
 
 <div id="flashOverlay" class="warp-flash"></div>
 
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
+<!-- Top Navigation HUD Bar -->
+<div class="top-hud">
+    <div class="brand">CHRONOX <span>CORE v4.8</span></div>
+    <div style="display:flex; gap:15px; align-items:center;">
+        <div class="hud-pill">
+            <div class="status-dot"></div> TACHYON FLUX: STABLE
+        </div>
+        <div class="hud-pill" id="soundToggleBtn" onclick="toggleAudio()" style="cursor:pointer;">
+            🔊 AUDIO: ENABLED
+        </div>
+    </div>
+</div>
 
-<div class="container">
+<div class="container" id="cockpitContainer">
 
-    <div class="panel left">
-        <h2 class="title">TEMPORAL INPUT</h2>
+    <!-- LEFT PANEL: CONTROLS & DESTINATION -->
+    <div class="panel">
+        <div class="corner-bracket cb-tl"></div><div class="corner-bracket cb-tr"></div>
+        <div class="corner-bracket cb-bl"></div><div class="corner-bracket cb-br"></div>
+
+        <div class="panel-title">TEMPORAL NAVIGATION</div>
+
+        <!-- DeLorean Digital LED Readout Stack -->
+        <div class="led-clock-stack">
+            <div class="led-card destination">
+                <div class="led-label">DESTINATION TIME</div>
+                <div class="led-display" id="dispDest">OCT 26 3025 - 08:30</div>
+            </div>
+            <div class="led-card present">
+                <div class="led-label">PRESENT TIME</div>
+                <div class="led-display" id="dispPresent">AUG 11 2026 - 11:54</div>
+            </div>
+            <div class="led-card departed">
+                <div class="led-label">LAST TIME DEPARTED</div>
+                <div class="led-display" id="dispDeparted">NOV 12 1955 - 06:38</div>
+            </div>
+        </div>
 
         <div class="input-group">
-            <label for="year">Destination Year</label>
-            <input type="number" id="year" value="3025" class="trigger-anim">
+            <div class="field-box">
+                <label>TARGET YEAR</label>
+                <input type="number" id="inYear" value="3025" onchange="updateDestDisplay()">
+            </div>
+            <div class="field-box">
+                <label>TARGET DATE & TIME</label>
+                <input type="datetime-local" id="inDateTime" onchange="updateDestDisplay()">
+            </div>
+            <div class="field-box">
+                <label>SPATIAL SECTOR</label>
+                <input type="text" id="inLoc" value="Neo-Kolkata Metroplex">
+            </div>
+            <div class="field-box">
+                <label>TIMELINE BRANCH</label>
+                <select id="inBranch" onchange="soundEngine.playClick()">
+                    <option value="Alpha-7 (Prime)">Alpha-7 (Prime Axis)</option>
+                    <option value="Beta-12 (Alternate)">Beta-12 (Divergent)</option>
+                    <option value="Gamma-Zero (Quantum Void)">Gamma-Zero (Quantum Void)</option>
+                </select>
+            </div>
 
-            <label for="date">Destination Date</label>
-            <input type="date" id="date" class="trigger-anim">
-
-            <!-- NEW: Destination Location Inputs -->
-            <label for="dest-loc">Destination Location</label>
-            <input type="text" id="dest-loc" value="Neo-Kolkata Metroplex" class="trigger-anim">
-
-            <label for="dest-coords">Spatial Coordinates</label>
-            <input type="text" id="dest-coords" value="LAT: 23.9554, LNG: 88.0336" class="trigger-anim">
-
-            <label for="branch">Timeline Branch</label>
-            <input type="text" id="branch" value="Alpha-7" class="trigger-anim">
+            <label>TEMPORAL PRESETS</label>
+            <div class="presets-grid">
+                <div class="btn-preset" onclick="applyPreset(1985, '1985-10-26T01:21', 'Hill Valley', 'Alpha-7 (Prime)')">1985 Classic</div>
+                <div class="btn-preset" onclick="applyPreset(2077, '2077-07-07T12:00', 'Night City Hub', 'Beta-12 (Alternate)')">2077 Cyberpunk</div>
+                <div class="btn-preset" onclick="applyPreset(-2560, '0001-01-01T12:00', 'Giza Plateau', 'Alpha-7 (Prime)')">Ancient Egypt</div>
+                <div class="btn-preset" onclick="applyPreset(-65000000, '0001-01-01T12:00', 'Pangea Prime', 'Gamma-Zero (Quantum Void)')">Jurassic Era</div>
+            </div>
         </div>
 
-        <button onclick="executeTravel()" id="jumpBtn">
-            INITIATE TIME JUMP
-        </button>
-
-        <div class="log" id="log">
-            <p>➜ System Ready...</p>
-            <p>➜ Quantum Core Stable...</p>
+        <div class="jump-control-wrapper">
+            <div class="interlock-row">
+                <span>TEMPORAL SAFETY INTERLOCK</span>
+                <div class="toggle-switch" id="interlockToggle" onclick="toggleInterlock()"></div>
+            </div>
+            <button class="btn-jump" id="jumpBtn" disabled onclick="executeTimeJump()">INITIATE TIME JUMP</button>
         </div>
     </div>
 
-    <div class="center">
-        <div class="time-core" id="core"></div>
+    <!-- CENTER PANEL: BLACK HOLE / WORMHOLE CANVAS CORE -->
+    <div class="center-display">
+        <div class="core-container">
+            <canvas id="warpCanvas" width="460" height="460"></canvas>
+            <div class="core-ring-overlay"></div>
+            <div class="core-ring-overlay-2"></div>
+        </div>
 
-        <div class="execution pulse" id="status">
-            CHRONO CORE ONLINE
+        <div class="center-hud-text">
+            <div class="status-headline" id="coreStatus">QUANTUM CORE READY</div>
+            <div class="status-sub" id="coreSubtext">GRAVITATIONAL LENSING AT NOMINAL LEVEL</div>
         </div>
     </div>
 
-    <div class="panel right">
-        <h2 class="title">SYSTEM STATUS</h2>
+    <!-- RIGHT PANEL: DIAGNOSTICS & LOGS -->
+    <div class="panel">
+        <div class="corner-bracket cb-tl"></div><div class="corner-bracket cb-tr"></div>
+        <div class="corner-bracket cb-bl"></div><div class="corner-bracket cb-br"></div>
 
-        <!-- NEW: Current Real-World Location Anchor -->
-        <div class="status-box">
-            <div class="status-title">Current Spatial Anchor</div>
-            <div class="anchor-text">Kandi, West Bengal, India</div>
-        </div>
+        <div class="panel-title">TELEMETRY & LOGS</div>
 
-        <div class="status-box">
-            <div class="status-title">Temporal Energy</div>
-            <div class="bar">
-                <div class="fill" id="energy"></div>
+        <div class="telemetry-group">
+            <div class="telemetry-row">
+                <div class="telemetry-meta"><span>TEMPORAL ENERGY</span><span id="txtEnergy">92%</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="barEnergy" style="width: 92%;"></div></div>
+            </div>
+
+            <div class="telemetry-row">
+                <div class="telemetry-meta"><span>FLUX MATRIX STABILITY</span><span id="txtStability">98%</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="barStability" style="width: 98%;"></div></div>
+            </div>
+
+            <div class="telemetry-row">
+                <div class="telemetry-meta"><span>CHRONAL PARADOX RISK</span><span id="txtParadox">3.2%</span></div>
+                <div class="bar-bg"><div class="bar-fill warning" id="barParadox" style="width: 3.2%;"></div></div>
             </div>
         </div>
 
-        <div class="status-box">
-            <div class="status-title">Timeline Stability</div>
-            <div class="bar">
-                <div class="fill" id="stability"></div>
-            </div>
+        <div style="font-size: 10px; color: rgba(0,243,255,0.6); margin-bottom: 6px; letter-spacing: 1px;">SYSTEM CONSOLE FEED</div>
+        <div class="terminal-log" id="termLog">
+            <div class="log-entry">➜ ChronoX Kernel v4.8 loaded.</div>
+            <div class="log-entry">➜ Quantum Core initialized.</div>
+            <div class="log-entry success">➜ Temporal Anchor lock on current epoch.</div>
         </div>
-
-        <div class="status-box">
-            <div class="status-title">Quantum Synchronization</div>
-            <div class="bar">
-                <div class="fill" id="sync"></div>
-            </div>
-        </div>
-
-        <div style="margin-top:25px">
-            <h3 class="warning">
-                PARADOX RISK: LOW
-            </h3>
-        </div>
-
     </div>
 
 </div>
 
 <script>
-const log = document.getElementById('log');
+/* ----------------------------------------------------
+   SYNTHESIZED WEB AUDIO ENGINE (PURE JS FX)
+---------------------------------------------------- */
+class WebAudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.enabled = true;
+    }
 
-function addLog(text){
-    const p = document.createElement('p');
-    p.innerText = "➜ " + text;
-    log.appendChild(p);
-    log.scrollTop = log.scrollHeight;
+    init() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    playClick() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.04);
+    }
+
+    playCharge() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(80, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1800, this.ctx.currentTime + 4.5);
+        gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.25, this.ctx.currentTime + 4.0);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 4.5);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 4.5);
+    }
+
+    playWarpBoom() {
+        if (!this.enabled) return;
+        this.init();
+        
+        // Noise buffer for explosion
+        const bufferSize = this.ctx.sampleRate * 2.0;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2500, this.ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 1.8);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.7, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.8);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start();
+    }
 }
 
-// Add animation to all input fields when changed
-document.querySelectorAll('.trigger-anim').forEach(input => {
-    input.addEventListener('change', function(e) {
-        if (this.value) {
-            this.classList.remove('input-flash');
-            void this.offsetWidth; 
-            this.classList.add('input-flash');
+const soundEngine = new WebAudioEngine();
 
-            addLog("Target Variable Updated: " + this.id.toUpperCase());
+function toggleAudio() {
+    soundEngine.enabled = !soundEngine.enabled;
+    document.getElementById('soundToggleBtn').innerText = soundEngine.enabled ? "🔊 AUDIO: ENABLED" : "🔇 AUDIO: MUTED";
+}
 
-            const core = document.getElementById('core');
-            core.style.animationDuration = '1s';
-            core.style.borderColor = '#00ff88';
-            core.style.color = '#00ff88';
-            core.style.boxShadow = '0 0 60px #00ff88, inset 0 0 60px #00ff88';
+/* ----------------------------------------------------
+   REAL-TIME CLOCK & LED DISPLAY LOGIC
+---------------------------------------------------- */
+function updateLiveClock() {
+    const now = new Date();
+    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const m = months[now.getMonth()];
+    const d = String(now.getDate()).padStart(2, '0');
+    const y = now.getFullYear();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
 
-            setTimeout(() => {
-                core.style.animationDuration = '8s';
-                core.style.borderColor = 'cyan';
-                core.style.color = 'cyan';
-                core.style.boxShadow = '0 0 40px cyan, inset 0 0 40px cyan';
-            }, 1500);
-        }
-    });
-});
+    document.getElementById('dispPresent').innerText = `${m} ${d} ${y} - ${hrs}:${mins}`;
+}
+setInterval(updateLiveClock, 1000);
+updateLiveClock();
 
-function executeTravel(){
-    const year = document.getElementById('year').value;
-    const destLoc = document.getElementById('dest-loc').value;
-    const destCoords = document.getElementById('dest-coords').value;
-    const status = document.getElementById('status');
-    const core = document.getElementById('core');
-    const btn = document.getElementById('jumpBtn');
+function updateDestDisplay() {
+    soundEngine.playClick();
+    const yearVal = document.getElementById('inYear').value || '3025';
+    const dateTimeVal = document.getElementById('inDateTime').value;
     
-    btn.disabled = true;
+    if (dateTimeVal) {
+        const dt = new Date(dateTimeVal);
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const m = months[dt.getMonth()];
+        const d = String(dt.getDate()).padStart(2, '0');
+        const hrs = String(dt.getHours()).padStart(2, '0');
+        const mins = String(dt.getMinutes()).padStart(2, '0');
+        document.getElementById('dispDest').innerText = `${m} ${d} ${yearVal} - ${hrs}:${mins}`;
+    } else {
+        document.getElementById('dispDest').innerText = `OCT 26 ${yearVal} - 08:30`;
+    }
+}
 
-    // Reset UI
-    core.style.borderColor = 'cyan';
-    core.style.color = 'cyan';
-    core.style.boxShadow = '0 0 40px cyan, inset 0 0 40px cyan';
-    status.style.color = 'cyan';
-    status.style.textShadow = '0 0 20px cyan';
-    document.getElementById('energy').style.width = "10%";
-    document.getElementById('stability').style.width = "10%";
-    document.getElementById('sync').style.width = "10%";
+function applyPreset(year, datetimeStr, location, branch) {
+    soundEngine.playClick();
+    document.getElementById('inYear').value = year;
+    document.getElementById('inDateTime').value = datetimeStr;
+    document.getElementById('inLoc').value = location;
+    document.getElementById('inBranch').value = branch;
+    updateDestDisplay();
+    addTerminalLog(`Preset Loaded: ${location} (${year})`, 'success');
+}
 
-    status.innerHTML = "JUMP INITIALIZING";
+/* ----------------------------------------------------
+   SAFETY INTERLOCK SWITCH
+---------------------------------------------------- */
+let interlockUnlocked = false;
+function toggleInterlock() {
+    soundEngine.playClick();
+    interlockUnlocked = !interlockUnlocked;
+    const toggle = document.getElementById('interlockToggle');
+    const btn = document.getElementById('jumpBtn');
 
-    addLog("Uncoupling from Origin: Kandi, West Bengal");
-    addLog("Locking Spatial Target: " + destLoc);
-    addLog("Mapping Coords: " + destCoords);
-    addLog("Target Year: " + year);
-
-    setTimeout(()=>{
-        addLog("Quantum Reactor Charging...");
-        document.getElementById('energy').style.width = "100%";
-    }, 1000);
-
-    setTimeout(()=>{
-        addLog("Timeline Stability Confirmed");
-        document.getElementById('stability').style.width = "95%";
-    }, 2000);
-
-    setTimeout(()=>{
-        addLog("Wormhole Formation Detected");
-        document.getElementById('sync').style.width = "100%";
-    }, 3000);
-
-    setTimeout(()=>{
-        addLog("Chrono Tunnel Open");
-        addLog("Space-Time Fold Initiated");
-        status.innerHTML = "TRAVELING THROUGH<br>SPACE-TIME...";
-        
-        document.body.classList.add('is-traveling');
-        core.style.animationDuration = '0.2s';
-        core.style.borderColor = 'white';
-        core.style.color = 'white';
-        core.style.boxShadow = '0 0 60px white, inset 0 0 60px white';
-    }, 4000);
-
-    setTimeout(()=>{
-        addLog("Arrival Successful");
-        
-        // Show multi-line arrival text
-        status.innerHTML = `ARRIVED IN ${year}<br><span style="font-size:18px; color:white;">${destLoc.toUpperCase()}</span>`;
-        
-        document.body.classList.remove('is-traveling');
-        
-        const flashOverlay = document.getElementById('flashOverlay');
-        flashOverlay.classList.remove('do-flash');
-        void flashOverlay.offsetWidth; 
-        flashOverlay.classList.add('do-flash');
-
-        core.style.animationDuration = '8s';
-        core.style.borderColor = '#ff00ff';
-        core.style.color = '#ff00ff';
-        core.style.boxShadow = '0 0 50px #ff00ff, inset 0 0 50px #ff00ff';
-        
-        status.style.color = '#ff00ff';
-        status.style.textShadow = '0 0 20px #ff00ff';
-
+    if (interlockUnlocked) {
+        toggle.classList.add('active');
         btn.disabled = false;
-    }, 6000);
+        addTerminalLog("SAFETY INTERLOCK DISENGAGED", "alert");
+    } else {
+        toggle.classList.remove('active');
+        btn.disabled = true;
+        addTerminalLog("SAFETY INTERLOCK ENGAGED", "normal");
+    }
+}
+
+function addTerminalLog(msg, type = "normal") {
+    const term = document.getElementById('termLog');
+    const div = document.createElement('div');
+    div.className = `log-entry ${type}`;
+    div.innerText = `➜ ${msg}`;
+    term.appendChild(div);
+    term.scrollTop = term.scrollHeight;
+}
+
+/* ----------------------------------------------------
+   3D PARTICLES WORMHOLE CANVAS VISUALIZER
+---------------------------------------------------- */
+const canvas = document.getElementById('warpCanvas');
+const ctx = canvas.getContext('2d');
+const width = canvas.width;
+const height = canvas.height;
+const cX = width / 2;
+const cY = height / 2;
+
+let particles = [];
+let numParticles = 280;
+let warpSpeed = 0.015;
+let isWarpingMode = false;
+let coreHue = 190;
+
+class WarpParticle {
+    constructor() {
+        this.reset();
+    }
+    reset() {
+        this.x = (Math.random() - 0.5) * width;
+        this.y = (Math.random() - 0.5) * height;
+        this.z = Math.random() * width;
+        this.color = Math.random() > 0.4 ? '#00f3ff' : '#ff0055';
+    }
+    update() {
+        this.z -= warpSpeed * 35;
+        if (this.z <= 0) {
+            this.reset();
+            this.z = width;
+        }
+    }
+    draw() {
+        const k = 120 / this.z;
+        const px = this.x * k + cX;
+        const py = this.y * k + cY;
+
+        if (px < 0 || px >= width || py < 0 || py >= height) return;
+
+        const size = Math.max(0.5, (1 - this.z / width) * 3.5);
+        
+        ctx.beginPath();
+        if (isWarpingMode) {
+            // Hyper-streak lines during warp
+            const prevK = 120 / (this.z + warpSpeed * 60);
+            const prevPx = this.x * prevK + cX;
+            const prevPy = this.y * prevK + cY;
+            ctx.moveTo(px, py);
+            ctx.lineTo(prevPx, prevPy);
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = size;
+            ctx.stroke();
+        } else {
+            ctx.arc(px, py, size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+    }
+}
+
+for (let i = 0; i < numParticles; i++) particles.push(new WarpParticle());
+
+function renderCanvas() {
+    ctx.fillStyle = isWarpingMode ? 'rgba(2, 6, 16, 0.25)' : 'rgba(2, 6, 16, 0.85)';
+    ctx.fillRect(0, 0, width, height);
+
+    // Accretion Core Ring
+    const grad = ctx.createRadialGradient(cX, cY, 10, cX, cY, 180);
+    grad.addColorStop(0, '#000000');
+    grad.addColorStop(0.2, `hsla(${coreHue}, 100%, 50%, 0.6)`);
+    grad.addColorStop(0.6, `hsla(${coreHue + 40}, 100%, 50%, 0.1)`);
+    grad.addColorStop(1, 'transparent');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cX, cY, 180, 0, Math.PI * 2);
+    ctx.fill();
+
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    // Event Horizon Black Hole Core Center
+    ctx.beginPath();
+    ctx.arc(cX, cY, isWarpingMode ? 40 : 25, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.shadowBlur = isWarpingMode ? 40 : 15;
+    ctx.shadowColor = `hsl(${coreHue}, 100%, 50%)`;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    requestAnimationFrame(renderCanvas);
+}
+renderCanvas();
+
+/* ----------------------------------------------------
+   TIME JUMP SEQUENCE EXECUTION
+---------------------------------------------------- */
+function executeTimeJump() {
+    const destYear = document.getElementById('inYear').value;
+    const destLoc = document.getElementById('inLoc').value;
+    const jumpBtn = document.getElementById('jumpBtn');
+    const container = document.getElementById('cockpitContainer');
+
+    // Lock Controls
+    jumpBtn.disabled = true;
+    soundEngine.playCharge();
+
+    addTerminalLog("CALCULATING TACHYON VECTOR...", "alert");
+    addTerminalLog(`TARGET EPOCH: YEAR ${destYear}`);
+    addTerminalLog(`TARGET SECTOR: ${destLoc}`);
+
+    document.getElementById('coreStatus').innerText = "CHARGING SINGULARITY";
+    document.getElementById('coreStatus').style.color = "#ff0055";
+
+    // Telemetry Spike Animations
+    document.getElementById('barEnergy').style.width = "20%";
+    document.getElementById('barStability').style.width = "40%";
+    document.getElementById('barParadox').style.width = "78%";
+
+    // Acceleration FX
+    let accelInt = setInterval(() => {
+        warpSpeed += 0.015;
+        coreHue += 15;
+    }, 200);
+
+    setTimeout(() => {
+        isWarpingMode = true;
+        container.classList.add('is-traveling');
+        document.getElementById('coreStatus').innerText = "WARP TUNNEL ENGAGED";
+        addTerminalLog("EVENT HORIZON CROSS - TRANSITING TIMELINE...", "alert");
+    }, 2500);
+
+    setTimeout(() => {
+        clearInterval(accelInt);
+        soundEngine.playWarpBoom();
+
+        // Flash Effect
+        const flash = document.getElementById('flashOverlay');
+        flash.classList.remove('do-flash');
+        void flash.offsetWidth;
+        flash.classList.add('do-flash');
+
+        // Update Departed LED Display to former present
+        document.getElementById('dispDeparted').innerText = document.getElementById('dispPresent').innerText;
+
+        // Update Visuals
+        container.classList.remove('is-traveling');
+        isWarpingMode = false;
+        warpSpeed = 0.015;
+        coreHue = 150;
+
+        document.getElementById('coreStatus').innerText = "ARRIVED AT DESTINATION";
+        document.getElementById('coreStatus').style.color = "#00ff88";
+        document.getElementById('coreSubtext').innerText = `TEMPORAL ANCHOR LOCKED: YEAR ${destYear}`;
+
+        // Reset Telemetry
+        document.getElementById('barEnergy').style.width = "95%";
+        document.getElementById('barStability').style.width = "99%";
+        document.getElementById('barParadox').style.width = "4%";
+
+        addTerminalLog(`TIME JUMP SUCCESSFUL -> ARRIVED IN YEAR ${destYear}`, "success");
+
+        // Re-enable Interlock Safety
+        toggleInterlock();
+    }, 5000);
 }
 </script>
 </body>
