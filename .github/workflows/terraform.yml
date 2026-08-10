@@ -24,6 +24,11 @@ jobs:
           client-id: "17d3e7cc-315a-497d-8057-391ba6ddb25d"
           subscription-id: "2dd57896-7866-4df4-8c9e-6830338bdf29"
           tenant-id: "59a67c47-bdae-49db-b64f-d0d414647a56"
+          enable-AzPSSession: false
+          environment: azurecloud
+          allow-no-subscriptions: false
+          audience: api://AzureADTokenExchange
+          auth-type: SERVICE_PRINCIPAL
 
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -43,7 +48,10 @@ jobs:
       # Only run apply on push events to the test branch
       - name: Terraform Apply
         if: github.ref == 'refs/heads/test' && github.event_name == 'push'
-        run: terraform apply tfplan
+        run: |
+          terraform apply tfplan
+          rm -f tfplan
+        shell: /usr/bin/bash -e {0}
 
       # Cleanup plan artifact unconditionally (success, failure, or cancellation)
       - name: Clean up Plan Artifact
