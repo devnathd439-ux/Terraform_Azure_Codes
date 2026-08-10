@@ -13,12 +13,10 @@ jobs:
     name: "Terraform"
     runs-on: ubuntu-latest
     
-    # Points to the exact directory where main.tf, provider.tf, etc. live
     defaults:
       run:
         working-directory: project_time_machine_git/environment/dev
 
-    # Define Azure-specific environment variables
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -36,9 +34,6 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        # with:
-        #   # You can specify a specific version of Terraform here
-        #   terraform_version: "1.5.0" 
 
       - name: Terraform Init
         run: terraform init
@@ -49,7 +44,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      # Only run apply if the event is a push to the main branch
+      # Only run apply if the event is a push to the test branch
       - name: Terraform Apply
         if: github.ref == 'refs/heads/test' && github.event_name == 'push'
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply tfplan
