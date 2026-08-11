@@ -18,6 +18,9 @@ jobs:
         working-directory: project_time_machine_git/environment/dev
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -29,9 +32,6 @@ jobs:
           allow-no-subscriptions: false
           audience: api://AzureADTokenExchange
           auth-type: SERVICE_PRINCIPAL
-
-      - name: Checkout Code
-        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -48,10 +48,7 @@ jobs:
       # Only run apply on push events to the test branch
       - name: Terraform Apply
         if: github.ref == 'refs/heads/test' && github.event_name == 'push'
-        run: |
-          terraform apply tfplan
-          rm -f tfplan
-        shell: /usr/bin/bash -e {0}
+        run: terraform apply -auto-approve tfplan
 
       # Cleanup plan artifact unconditionally (success, failure, or cancellation)
       - name: Clean up Plan Artifact
