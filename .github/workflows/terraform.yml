@@ -3,16 +3,20 @@ name: "Terraform Pipeline"
 on:
   push:
     branches:
-      - test    
+      - test
   pull_request:
     branches:
       - test
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: project_time_machine_git/environment/dev
@@ -45,12 +49,10 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      # Only run apply on push events to the test branch
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/test' && github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/test'
         run: terraform apply -auto-approve tfplan
 
-      # Cleanup plan artifact unconditionally (success, failure, or cancellation)
-      - name: Clean up Plan Artifact
+      - name: Clean up Plan
         if: always()
         run: rm -f tfplan
