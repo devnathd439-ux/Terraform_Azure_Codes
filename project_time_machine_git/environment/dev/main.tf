@@ -50,8 +50,8 @@ module "vnet_peering" {
   depends_on = [module.time_machine_virtual_networks]
   source     = "../../child_modules/vnet_peering"
 }
-# module "nsgs" {
-#   depends_on = [module.time_machine_rg, module.time_machine_virtual_networks, module.time_machine_subnet]
-#   source     = "../../child_modules/network_security"
-#   nsgs       = var.nsgs
-# }
+module "nsgs" {
+  depends_on = [module.time_machine_rg, module.time_machine_virtual_networks, module.time_machine_subnet]
+  source     = "../../child_modules/network_security"
+  nsgs       = var.nsgs
+}
