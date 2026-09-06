@@ -2,6 +2,11 @@ module "time_machine_rg" {
   source          = "../../child_modules/resource_group"
   time_machine_rg = var.time_machine_rg
 }
+module "time_machine_storage_account" {
+  depends_on                   = [module.time_machine_rg]
+  source                       = "../../child_modules/storage_account"
+  time_machine_storage_account = var.time_machine_storage_account.timemachinestorage
+}
 module "time_machine_virtual_networks" {
   depends_on                    = [module.time_machine_rg]
   source                        = "../../child_modules/virtual_network"

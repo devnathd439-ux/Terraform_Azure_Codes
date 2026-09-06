@@ -1,4 +1,5 @@
 variable "time_machine_rg" {}
+variable "time_machine_storage_account" {}
 variable "time_machine_virtual_networks" {}
 variable "time_machine_subnet" {}
 variable "timemachine_subnet_pip" {}

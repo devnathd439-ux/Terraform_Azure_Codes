@@ -1,6 +1,13 @@
 time_machine_rg = {
   project_time_machine = "centralindia"
 }
+time_machine_storage_account = {
+  timemachinestorage = {
+    name                = "timemachinestorage"
+    resource_group_name = "project_time_machine"
+    location            = "centralindia"
+  }
+}
 time_machine_virtual_networks = {
   vnet_1 = {
     name                = "power_unit"
