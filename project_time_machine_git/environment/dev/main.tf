@@ -2,6 +2,15 @@ module "time_machine_rg" {
   source          = "../../child_modules/resource_group"
   time_machine_rg = var.time_machine_rg
 }
+module "time_machine_storage_account" {
+  depends_on                   = [module.time_machine_rg]
+  source                       = "../../child_modules/storage_account"
+  time_machine_storage_account = var.time_machine_storage_account.timemachinestorage
+}
+# module "backend_block_storage" {
+#   depends_on = [module.time_machine_storage_account]
+#   source     = "../../child_modules/backend_Block_Storage"
+# }
 module "time_machine_virtual_networks" {
   depends_on                    = [module.time_machine_rg]
   source                        = "../../child_modules/virtual_network"
@@ -50,8 +59,8 @@ module "vnet_peering" {
   depends_on = [module.time_machine_virtual_networks]
   source     = "../../child_modules/vnet_peering"
 }
-# module "nsgs" {
-#   depends_on = [module.time_machine_rg, module.time_machine_virtual_networks, module.time_machine_subnet]
-#   source     = "../../child_modules/network_security"
-#   nsgs       = var.nsgs
-# }
+module "nsgs" {
+  depends_on = [module.time_machine_rg, module.time_machine_virtual_networks, module.time_machine_subnet]
+  source     = "../../child_modules/network_security"
+  nsgs       = var.nsgs
+}
