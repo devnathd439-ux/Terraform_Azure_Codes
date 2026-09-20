@@ -7,6 +7,10 @@ module "time_machine_storage_account" {
   source                       = "../../child_modules/storage_account"
   time_machine_storage_account = var.time_machine_storage_account.timemachinestorage
 }
+# module "backend_block_storage" {
+#   depends_on = [module.time_machine_storage_account]
+#   source     = "../../child_modules/backend_Block_Storage"
+# }
 module "time_machine_virtual_networks" {
   depends_on                    = [module.time_machine_rg]
   source                        = "../../child_modules/virtual_network"
