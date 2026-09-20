@@ -1,5 +1,6 @@
 time_machine_rg = {
   project_time_machine = "centralindia"
+  project_time_ADO = "centralindia"
 }
 time_machine_storage_account = {
   timemachinestorage = {
