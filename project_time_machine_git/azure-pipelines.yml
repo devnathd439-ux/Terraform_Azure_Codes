@@ -1,0 +1,11 @@
+trigger:
+  branches:
+    include:
+      - "*"  # Jis branch me push par trigger karna ho
+
+pool:
+  vmImage: 'TimeMachine-Agent'
+
+steps:
+- script: echo "Pipeline automatically triggered from GitHub push!"
+  displayName: 'Verify Trigger'
